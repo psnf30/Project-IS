@@ -226,7 +226,7 @@ if choice == "Air Quality Prediction (ML)":
 
     # ตรวจสอบว่าผู้ใช้ได้กรอกข้อมูลครบถ้วนหรือไม่
      if st.button("Predict Air Quality"):
-     with st.spinner('Predicting...'):
+      with st.spinner('Predicting...'):
         input_data = air_quality_scaler.transform(
             np.array([[pm25, pm10, temp, humidity, wind_speed]])
         )
