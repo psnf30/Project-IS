@@ -226,17 +226,17 @@ if choice == "Air Quality Prediction (ML)":
 
     # ตรวจสอบว่าผู้ใช้ได้กรอกข้อมูลครบถ้วนหรือไม่
     if st.button("Predict Air Quality"):
-      with st.spinner('Predicting...'):
-        input_data = air_quality_scaler.transform(
-            np.array([[pm25, pm10, temp, humidity, wind_speed]])
-        )
+        with st.spinner('Predicting...'):
+            input_data = air_quality_scaler.transform(
+                np.array([[pm25, pm10, temp, humidity, wind_speed]])
+            )
             predictions = {}
             probabilities = {}
             # ทำนายด้วย SVM
-                if "SVM (Current)" in selected_models:
-                    pred_svm = svm_air_quality_model.predict(input_data)[0]
-                    predictions["SVM"] = pred_svm
-                    probabilities["SVM"] = list(svm_air_quality_model.predict_proba(input_data)[0])
+            if "SVM (Current)" in selected_models:
+                pred_svm = svm_air_quality_model.predict(input_data)[0]
+                predictions["SVM"] = pred_svm
+                probabilities["SVM"] = list(svm_air_quality_model.predict_proba(input_data)[0])
 
             # ทำนายด้วย Random Forest
             if "Random Forest" in selected_models:
