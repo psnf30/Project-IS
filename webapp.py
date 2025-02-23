@@ -338,8 +338,8 @@ if choice == "Fruit Classification (NN)":
                 predicted_confidence = probabilities[0][prediction] * 100  # เปลี่ยนเป็นเปอร์เซ็นต์
 
                 # แสดงข้อความพร้อม Confidence
-                st.success(f"Predicted Fruit Type: {fruit_name} \n**Confidence: {confidence:.2f}%**")
-
+                st.success(f"**Predicted Fruit Type: {fruit_name}**   \n**Confidence: {confidence:.2f}%**")
+                
                 # สร้าง DataFrame สำหรับแสดง probability ของทุกคลาส (เพื่อทำกราฟ)
                 prob_df_fruit = pd.DataFrame({
                     'Fruit Type': fruit_label_encoder.classes_,
