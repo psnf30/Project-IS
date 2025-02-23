@@ -259,7 +259,11 @@ if choice == "Air Quality Prediction (ML)":
             st.subheader("Prediction Results")
             for model_name, pred_class in predictions.items():
                 confidence = max(probabilities[model_name]) * 100  # เปลี่ยนเป็นเปอร์เซ็นต์
-                st.info(f"**{model_name} Prediction:** {quality_mapping[pred_class]}  \n**Confidence: {confidence:.2f}%**")
+                st.info(f"""
+**{model_name} Prediction:** {quality_mapping[pred_class]}
+
+Confidence: {confidence:.2f}%
+""")
 
             # กราฟเส้นเปรียบเทียบค่าอินพุตกับ Good Standard
             factors = ['PM2.5', 'PM10', 'Temperature', 'Humidity', 'Wind Speed']
@@ -337,8 +341,8 @@ if choice == "Fruit Classification (NN)":
                 # หาความน่าจะเป็น (probability) ของคลาสที่ทำนายได้
                 predicted_confidence = probabilities[0][prediction] * 100  # เปลี่ยนเป็นเปอร์เซ็นต์
 
-                # แสดงข้อความพร้อม Confidence
-                st.success(f"**Predicted Fruit Type: {fruit_name}**   \n**Confidence: {confidence:.2f}%**")
+                # แสดงข้อความพร้อม Confidence (แก้ไขตัวแปรเป็น predicted_confidence)
+                st.success(f"**Predicted Fruit Type: {fruit_name}**  \n**Confidence: {predicted_confidence:.2f}%**")
                 
                 # สร้าง DataFrame สำหรับแสดง probability ของทุกคลาส (เพื่อทำกราฟ)
                 prob_df_fruit = pd.DataFrame({
