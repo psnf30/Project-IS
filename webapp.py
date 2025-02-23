@@ -255,10 +255,12 @@ if choice == "Air Quality Prediction (ML)":
                 st.success(f"{model_name} Predicted Air Quality: {quality_mapping[pred_class]} (Confidence: {confidence:.2f}%)")
             
             categories = ["Good", "Moderate", "Poor"]
+            selected_model = selected_models[0]  # ดึงค่าโมเดลตัวแรกที่ถูกเลือก
             prob_data = {
                 "Air Quality": categories,
-                    selected_models: probabilities[selected_models]
+                selected_model: probabilities[selected_model]
             }
+
             
             prob_df = pd.DataFrame(prob_data)
             prob_df_melted = prob_df.melt(
