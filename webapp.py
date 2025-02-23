@@ -204,6 +204,18 @@ if choice == "Air Quality Prediction (ML)":
         ["SVM (Current)", "Random Forest"],
         default=["SVM (Current)"]
     )
+    # ข้อมูลตัวอย่างสำหรับแต่ละระดับ
+    example_options = {
+        "Good": {"PM2.5": 5.0, "PM10": 20.0, "Temperature": 22.0, "Humidity": 50.0, "Wind Speed": 10.0},
+        "Moderate": {"PM2.5": 40.0, "PM10": 70.0, "Temperature": 28.0, "Humidity": 40.0, "Wind Speed": 5.0},
+        "Poor": {"PM2.5": 100.0, "PM10": 150.0, "Temperature": 35.0, "Humidity": 30.0, "Wind Speed": 2.0}
+    }
+
+    selected_example = st.selectbox("Select Example Data", ["Custom", "Good", "Moderate", "Poor"])
+    example_data_air_quality = example_options.get(
+        selected_example, 
+        {"PM2.5": 0.0, "PM10": 0.0, "Temperature": 0.0, "Humidity": 0.0, "Wind Speed": 0.0}
+    )
 
     # ใช้ฟังก์ชัน hybrid_input เพื่อรับค่าอินพุต
     pm25 = hybrid_input("PM2.5", 0.0, 300.0, 50.0)
