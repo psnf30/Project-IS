@@ -225,7 +225,7 @@ if choice == "Air Quality Prediction (ML)":
     wind_speed = hybrid_input("Wind Speed (km/h)", 0.0, 50.0, 10.0)
 
     # ตรวจสอบว่าผู้ใช้ได้กรอกข้อมูลครบถ้วนหรือไม่
-    if st.button("🚀 Predict Air Quality"):
+    if st.button("Predict Air Quality"):
      if any(value == 0.0 for value in [pm25, pm10, temp, humidity, wind_speed]):
         st.error("⚠️ กรุณากรอกค่าทุกช่องก่อนทำการพยากรณ์!")
      else:
@@ -255,7 +255,7 @@ if choice == "Air Quality Prediction (ML)":
             st.subheader("📊 Prediction Results")
             for model_name, pred_class in predictions.items():
                 confidence = max(probabilities[model_name]) * 100  # เปลี่ยนเป็นเปอร์เซ็นต์
-                st.info(f"**{model_name} Prediction:** {quality_mapping[pred_class]}  \n🎯 **Confidence: {confidence:.2f}%**")
+                st.info(f"**{model_name} Prediction:** {quality_mapping[pred_class]}  \n**Confidence: {confidence:.2f}%**")
 
             # ✅ กราฟเส้นเปรียบเทียบค่าอินพุตกับ Good Standard
             factors = ['PM2.5', 'PM10', 'Temperature', 'Humidity', 'Wind Speed']
