@@ -204,6 +204,7 @@ if choice == "Air Quality Prediction (ML)":
         ["SVM (Current)", "Random Forest"],
         default=["SVM (Current)"]
     )
+    
     # ข้อมูลตัวอย่างสำหรับแต่ละระดับ
     example_options = {
         "Good": {"PM2.5": 5.0, "PM10": 20.0, "Temperature": 22.0, "Humidity": 50.0, "Wind Speed": 10.0},
@@ -212,26 +213,33 @@ if choice == "Air Quality Prediction (ML)":
     }
 
     selected_example = st.selectbox("Select Example Data", ["Custom", "Good", "Moderate", "Poor"])
-    example_data_air_quality = example_options.get(
-        selected_example, 
-        {"PM2.5": 0.0, "PM10": 0.0, "Temperature": 0.0, "Humidity": 0.0, "Wind Speed": 0.0}
-    )
 
-    # ใช้ฟังก์ชัน hybrid_input เพื่อรับค่าอินพุต
-    pm25 = hybrid_input("PM2.5", 0.0, 300.0, 50.0)
-    pm10 = hybrid_input("PM10", 0.0, 300.0, 100.0)
-    temp = hybrid_input("Temperature (C)", -50.0, 50.0, 25.0)
-    humidity = hybrid_input("Humidity (%)", 0.0, 100.0, 50.0)
-    wind_speed = hybrid_input("Wind Speed (km/h)", 0.0, 50.0, 10.0)
+    # หากผู้ใช้เลือกตัวอย่าง (Good, Moderate, Poor) ให้นำค่าจาก example_options มาใส่เป็น default
+    if selected_example != "Custom":
+        example_data_air_quality = example_options[selected_example]
+        pm25 = hybrid_input("PM2.5", 0.0, 300.0, float(example_data_air_quality["PM2.5"]))
+        pm10 = hybrid_input("PM10", 0.0, 300.0, float(example_data_air_quality["PM10"]))
+        temp = hybrid_input("Temperature (C)", -50.0, 50.0, float(example_data_air_quality["Temperature"]))
+        humidity = hybrid_input("Humidity (%)", 0.0, 100.0, float(example_data_air_quality["Humidity"]))
+        wind_speed = hybrid_input("Wind Speed (km/h)", 0.0, 50.0, float(example_data_air_quality["Wind Speed"]))
+    else:
+        # กรณี Custom ใช้ค่า default เอง
+        pm25 = hybrid_input("PM2.5", 0.0, 300.0, 50.0)
+        pm10 = hybrid_input("PM10", 0.0, 300.0, 100.0)
+        temp = hybrid_input("Temperature (C)", -50.0, 50.0, 25.0)
+        humidity = hybrid_input("Humidity (%)", 0.0, 100.0, 50.0)
+        wind_speed = hybrid_input("Wind Speed (km/h)", 0.0, 50.0, 10.0)
 
-    # ตรวจสอบว่าผู้ใช้ได้กรอกข้อมูลครบถ้วนหรือไม่
+    # ปุ่มกดเพื่อทำนาย
     if st.button("Predict Air Quality"):
         with st.spinner('Predicting...'):
+            # เตรียมข้อมูลก่อนทำนาย
             input_data = air_quality_scaler.transform(
                 np.array([[pm25, pm10, temp, humidity, wind_speed]])
             )
             predictions = {}
             probabilities = {}
+
             # ทำนายด้วย SVM
             if "SVM (Current)" in selected_models:
                 pred_svm = svm_air_quality_model.predict(input_data)[0]
@@ -244,6 +252,7 @@ if choice == "Air Quality Prediction (ML)":
                 predictions["Random Forest"] = pred_rf
                 probabilities["Random Forest"] = list(rf_air_quality_model.predict_proba(input_data)[0])
 
+            # แมปผลลัพธ์เป็นข้อความ
             quality_mapping = {0: "✅ Good", 1: "⚠️ Moderate", 2: "❌ Poor"}
 
             # แสดงผลลัพธ์ของแต่ละโมเดล
@@ -252,10 +261,10 @@ if choice == "Air Quality Prediction (ML)":
                 confidence = max(probabilities[model_name]) * 100  # เปลี่ยนเป็นเปอร์เซ็นต์
                 st.info(f"**{model_name} Prediction:** {quality_mapping[pred_class]}  \n**Confidence: {confidence:.2f}%**")
 
-            # ✅ กราฟเส้นเปรียบเทียบค่าอินพุตกับ Good Standard
+            # กราฟเส้นเปรียบเทียบค่าอินพุตกับ Good Standard
             factors = ['PM2.5', 'PM10', 'Temperature', 'Humidity', 'Wind Speed']
             values = [pm25, pm10, temp, humidity, wind_speed]
-            standards = [12, 50, 25, 50, 10]  
+            standards = [12, 50, 25, 50, 10]  # สมมติว่า Good Standard เป็นค่ากลาง
 
             comparison_df = pd.DataFrame({
                 'Factors': factors, 
@@ -301,6 +310,7 @@ if choice == "Fruit Classification (NN)":
         {"Weight": 0.0, "Length": 0.0, "Circumference": 0.0, "Color": 0}
     )
 
+    # ตั้งค่าค่า default ตามตัวอย่างที่เลือก
     weight = hybrid_input("Weight (g)", 0.0, 500.0, float(example_data_fruit["Weight"]))
     length = hybrid_input("Length (cm)", 0.0, 30.0, float(example_data_fruit["Length"]))
     circumference = hybrid_input("Circumference (cm)", 0.0, 40.0, float(example_data_fruit["Circumference"]))
@@ -323,17 +333,16 @@ if choice == "Fruit Classification (NN)":
                 fruit_name = fruit_label_encoder.inverse_transform([prediction])[0]
                 st.success(f"Predicted Fruit Type: {fruit_name}")
 
-                # ✅ สร้าง DataFrame อย่างถูกต้อง
+                # สร้าง DataFrame สำหรับแสดง probability
                 prob_df_fruit = pd.DataFrame({
                     'Fruit Type': fruit_label_encoder.classes_,
                     'Probability': probabilities[0]
                 })
 
-                # ✅ ตรวจสอบ Debugging DataFrame
                 st.subheader("🔍 Debugging: Probability Data")
                 st.write(prob_df_fruit)
 
-                # ✅ วาดกราฟแท่งให้ถูกต้อง
+                # วาดกราฟแท่ง
                 fig_fruit = px.bar(
                     prob_df_fruit, 
                     x='Fruit Type', 
@@ -341,13 +350,11 @@ if choice == "Fruit Classification (NN)":
                     color='Fruit Type', 
                     title='Prediction Confidence'
                 )
-
                 fig_fruit.update_layout(
                     yaxis=dict(range=[0, 1]),
                     xaxis_title="Fruit Type",
                     yaxis_title="Probability"
                 )
-
                 st.plotly_chart(fig_fruit)
             else:
                 st.error("Error: Probability output is incorrect. Check the model output format.")
