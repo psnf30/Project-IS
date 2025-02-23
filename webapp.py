@@ -311,9 +311,9 @@ if choice == "Fruit Classification (NN)":
     )
 
     # ตั้งค่าค่า default ตามตัวอย่างที่เลือก
-    weight = hybrid_input("Weight (g)", 0.0, 500.0, float(example_data_fruit["Weight"]))
-    length = hybrid_input("Length (cm)", 0.0, 30.0, float(example_data_fruit["Length"]))
-    circumference = hybrid_input("Circumference (cm)", 0.0, 40.0, float(example_data_fruit["Circumference"]))
+    weight = st.number_input("Weight (g)", 0.0, 500.0, float(example_data_fruit["Weight"]), step=0.1)
+    length = st.number_input("Length (cm)", 0.0, 30.0, float(example_data_fruit["Length"]), step=0.1)
+    circumference = st.number_input("Circumference (cm)", 0.0, 40.0, float(example_data_fruit["Circumference"]), step=0.1)
     color = st.selectbox(
         "Color", 
         [0, 1, 2], 
@@ -325,21 +325,28 @@ if choice == "Fruit Classification (NN)":
         with st.spinner('Classifying...'):
             input_data = fruit_scaler.transform(np.array([[weight, length, circumference, color]]))
             
-            # ตรวจสอบว่า predict_proba() คืนค่าถูกต้อง
+            # predict_proba() จะคืนค่า probability ของทุกคลาส
             probabilities = mlp_fruit_model.predict_proba(input_data)
             
             if probabilities is not None and probabilities.shape[1] == len(fruit_label_encoder.classes_):
+                # ทำนายคลาส (index)
                 prediction = mlp_fruit_model.predict(input_data)[0]
+                # แปลง index -> ชื่อผลไม้ (เช่น 0 -> Apple, 1 -> Banana, 2 -> Orange)
                 fruit_name = fruit_label_encoder.inverse_transform([prediction])[0]
-                st.success(f"Predicted Fruit Type: {fruit_name}")
+                
+                # หาความน่าจะเป็น (probability) ของคลาสที่ทำนายได้
+                predicted_confidence = probabilities[0][prediction] * 100  # เปลี่ยนเป็นเปอร์เซ็นต์
 
-                # สร้าง DataFrame สำหรับแสดง probability
+                # แสดงข้อความพร้อม Confidence
+                st.success(f"Predicted Fruit Type: {fruit_name} (Confidence: {predicted_confidence:.2f}%)")
+
+                # สร้าง DataFrame สำหรับแสดง probability ของทุกคลาส (เพื่อทำกราฟ)
                 prob_df_fruit = pd.DataFrame({
                     'Fruit Type': fruit_label_encoder.classes_,
                     'Probability': probabilities[0]
                 })
 
-                # แสดงเฉพาะกราฟแท่ง (ลบตารางออก)
+                # วาดกราฟแท่ง
                 fig_fruit = px.bar(
                     prob_df_fruit, 
                     x='Fruit Type', 
