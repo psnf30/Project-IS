@@ -268,52 +268,56 @@ if choice == "Air Quality Prediction (ML)":
 
             prob_df = pd.DataFrame(prob_data)
 
-            # แปลงข้อมูลให้อยู่ในรูปแบบ Melted DataFrame
-            prob_df_melted = prob_df.melt(
-                id_vars=["Air Quality"], 
-                var_name="Model", 
-                value_name="Probability"
-            )
-
-            prob_df_melted["Probability"] = prob_df_melted["Probability"].round(3)
-            prob_df_melted["Air Quality"] = pd.Categorical(
-                prob_df_melted["Air Quality"], 
-                categories=["Good", "Moderate", "Poor"], 
-                ordered=True
-            )
-
-            # พล็อตกราฟเฉพาะโมเดลที่เลือก
-            st.subheader("📊 Model Prediction Confidence")
-
-            if len(models_selected) > 1:
-                fig = px.line(
-                    prob_df_melted,
-                    x="Air Quality",
-                    y="Probability",
-                    color="Model",
-                    markers=True,
-                    title="Comparison of Prediction Confidence"
+            # 🔹 **แก้ไขเงื่อนไข ตรวจสอบให้แน่ใจว่าโมเดลที่เลือกมีค่าคำนวณ**
+            if not prob_df.empty:
+                # แปลงข้อมูลให้อยู่ในรูปแบบ Melted DataFrame
+                prob_df_melted = prob_df.melt(
+                    id_vars=["Air Quality"], 
+                    var_name="Model", 
+                    value_name="Probability"
                 )
+
+                prob_df_melted["Probability"] = prob_df_melted["Probability"].round(3)
+                prob_df_melted["Air Quality"] = pd.Categorical(
+                    prob_df_melted["Air Quality"], 
+                    categories=["Good", "Moderate", "Poor"], 
+                    ordered=True
+                )
+
+                # พล็อตกราฟเฉพาะโมเดลที่เลือก
+                st.subheader("📊 Model Prediction Confidence")
+
+                if len(models_selected) > 1:
+                    fig = px.line(
+                        prob_df_melted,
+                        x="Air Quality",
+                        y="Probability",
+                        color="Model",
+                        markers=True,
+                        title="Comparison of Prediction Confidence"
+                    )
+                else:
+                    fig = px.bar(
+                        prob_df_melted,
+                        x="Air Quality",
+                        y="Probability",
+                        color="Model",
+                        barmode="group",
+                        title="Prediction Confidence"
+                    )
+
+                fig.update_layout(
+                    yaxis=dict(
+                        range=[0, 1],
+                        tickvals=[0, 0.2, 0.4, 0.6, 0.8, 1.0],
+                        tickformat=".3f"
+                    ),
+                    xaxis=dict(type='category')
+                )
+
+                st.plotly_chart(fig)
             else:
-                fig = px.bar(
-                    prob_df_melted,
-                    x="Air Quality",
-                    y="Probability",
-                    color="Model",
-                    barmode="group",
-                    title="Prediction Confidence"
-                )
-
-            fig.update_layout(
-                yaxis=dict(
-                    range=[0, 1],
-                    tickvals=[0, 0.2, 0.4, 0.6, 0.8, 1.0],
-                    tickformat=".3f"
-                ),
-                xaxis=dict(type='category')
-            )
-
-            st.plotly_chart(fig)
+                st.error("⚠️ ไม่พบค่าความน่าจะเป็นที่คำนวณได้ กรุณาลองใหม่")
 
             # ✅ กราฟเส้นเปรียบเทียบค่าอินพุตกับ Good Standard
             factors = ['PM2.5', 'PM10', 'Temperature', 'Humidity', 'Wind Speed']
