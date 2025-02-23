@@ -257,7 +257,7 @@ if choice == "Air Quality Prediction (ML)":
             categories = ["Good", "Moderate", "Poor"]
             prob_data = {
                 "Air Quality": categories,
-                selected_models: probabilities[selected_models]
+                    selected_models: probabilities[selected_models]
             }
             
             prob_df = pd.DataFrame(prob_data)
