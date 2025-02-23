@@ -230,9 +230,8 @@ if choice == "Air Quality Prediction (ML)":
         input_data = air_quality_scaler.transform(
             np.array([[pm25, pm10, temp, humidity, wind_speed]])
         )
-                predictions = {}
-                probabilities = {}
-
+            predictions = {}
+            probabilities = {}
             # ทำนายด้วย SVM
                 if "SVM (Current)" in selected_models:
                     pred_svm = svm_air_quality_model.predict(input_data)[0]
