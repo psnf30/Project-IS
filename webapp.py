@@ -339,10 +339,7 @@ if choice == "Fruit Classification (NN)":
                     'Probability': probabilities[0]
                 })
 
-                st.subheader("🔍 Debugging: Probability Data")
-                st.write(prob_df_fruit)
-
-                # วาดกราฟแท่ง
+                # แสดงเฉพาะกราฟแท่ง (ลบตารางออก)
                 fig_fruit = px.bar(
                     prob_df_fruit, 
                     x='Fruit Type', 
