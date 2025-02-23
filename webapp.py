@@ -96,10 +96,11 @@ if choice == "SVM Model Development":
     - The image below illustrates **how SVM finds an optimal hyperplane to separate different classes**:
     """)
 
+    # เปลี่ยน use_column_width=True เป็น use_container_width=True
     st.image(
         "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/SVM_margin.png/450px-SVM_margin.png",
         caption="SVM Hyperplane: Maximizing Margin Between Two Classes",
-        use_column_width=True
+        use_container_width=True
     )
 
     st.write("""
@@ -153,10 +154,11 @@ if choice == "MLP Model Development":
     - The following image illustrates **the structure of a Multilayer Perceptron (MLP)**:
     """)
 
+    # เปลี่ยน use_column_width=True เป็น use_container_width=True เช่นเดียวกัน (หากมี)
     st.image(
         "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Artificial_neural_network.svg/600px-Artificial_neural_network.svg.png",
         caption="MLP Structure: Input Layer, Hidden Layers, and Output Layer",
-        use_column_width=True
+        use_container_width=True
     )
 
     st.write("""
