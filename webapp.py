@@ -225,63 +225,85 @@ if choice == "Air Quality Prediction (ML)":
     wind_speed = hybrid_input("Wind Speed (km/h)", 0.0, 50.0, 10.0)
 
     # ตรวจสอบว่าผู้ใช้ได้กรอกข้อมูลครบถ้วนหรือไม่
-    # Prediction
     if st.button("Predict Air Quality"):
-        if any(value == 0.0 for value in [pm25, pm10, temp, humidity, wind_speed]):
-            st.error("⚠️ Please fill in all fields before prediction!")
-        else:
-            with st.spinner('Predicting...'):
-                input_data = air_quality_scaler.transform(
-                    np.array([[pm25, pm10, temp, humidity, wind_speed]])
+     if any(value == 0.0 for value in [pm25, pm10, temp, humidity, wind_speed]):
+        st.error("⚠️ กรุณากรอกค่าทุกช่องก่อนทำการพยากรณ์!")
+     else:
+        with st.spinner('Predicting...'):
+            input_data = air_quality_scaler.transform(
+                np.array([[pm25, pm10, temp, humidity, wind_speed]])
             )
-            
+
             predictions = {}
             probabilities = {}
-            
-            if selected_models == "SVM (Current)":
+
+            # ทำนายด้วย SVM
+            if "SVM (Current)" in selected_models:
                 pred_svm = svm_air_quality_model.predict(input_data)[0]
                 predictions["SVM"] = pred_svm
                 probabilities["SVM"] = list(svm_air_quality_model.predict_proba(input_data)[0])
-            
-            elif selected_models == "Random Forest":
+
+            # ทำนายด้วย Random Forest
+            if "Random Forest" in selected_models:
                 pred_rf = rf_air_quality_model.predict(input_data)[0]
                 predictions["Random Forest"] = pred_rf
                 probabilities["Random Forest"] = list(rf_air_quality_model.predict_proba(input_data)[0])
-            
-            quality_mapping = {0: "Good", 1: "Moderate", 2: "Poor"}
-            
-            for model_name, pred_class in predictions.items():
-                confidence = max(probabilities[model_name]) * 100
-                st.success(f"{model_name} Predicted Air Quality: {quality_mapping[pred_class]} (Confidence: {confidence:.2f}%)")
-            
-            categories = ["Good", "Moderate", "Poor"]
-            selected_model = selected_models[0]  # ดึงค่าโมเดลตัวแรกที่ถูกเลือก
-            prob_data = {
-                "Air Quality": categories,
-                selected_model: probabilities[selected_model]
-            }
 
-            
+            quality_mapping = {0: "Good", 1: "Moderate", 2: "Poor"}
+
+            # แสดงผลลัพธ์ของแต่ละโมเดล
+            for model_name, pred_class in predictions.items():
+                confidence = max(probabilities[model_name]) * 100  # เปลี่ยนเป็นเปอร์เซ็นต์
+                st.success(f"{model_name} Predicted Air Quality: {quality_mapping[pred_class]} (Confidence: {confidence:.2f}%)")
+
+            # จัดรูปแบบข้อมูลสำหรับกราฟ
+            categories = ["Good", "Moderate", "Poor"]
+            prob_data = {"Air Quality": categories}
+            models_selected = []
+
+            for model_name in selected_models:
+                if model_name in probabilities:
+                    prob_data[model_name] = probabilities[model_name]
+                    models_selected.append(model_name)
+
             prob_df = pd.DataFrame(prob_data)
+
+            # แปลงข้อมูลให้อยู่ในรูปแบบ Melted DataFrame
             prob_df_melted = prob_df.melt(
                 id_vars=["Air Quality"], 
                 var_name="Model", 
                 value_name="Probability"
             )
-            
+
             prob_df_melted["Probability"] = prob_df_melted["Probability"].round(3)
-            
-            st.subheader(f"📊 {selected_models} Prediction Confidence")
-            
-            fig = px.bar(
-                prob_df_melted,
-                x="Air Quality",
-                y="Probability",
-                color="Model",
-                barmode="group",
-                title=f"{selected_models} Prediction Confidence"
+            prob_df_melted["Air Quality"] = pd.Categorical(
+                prob_df_melted["Air Quality"], 
+                categories=["Good", "Moderate", "Poor"], 
+                ordered=True
             )
-            
+
+            # พล็อตกราฟเฉพาะโมเดลที่เลือก
+            st.subheader("📊 Model Prediction Confidence")
+
+            if len(models_selected) > 1:
+                fig = px.line(
+                    prob_df_melted,
+                    x="Air Quality",
+                    y="Probability",
+                    color="Model",
+                    markers=True,
+                    title="Comparison of Prediction Confidence"
+                )
+            else:
+                fig = px.bar(
+                    prob_df_melted,
+                    x="Air Quality",
+                    y="Probability",
+                    color="Model",
+                    barmode="group",
+                    title="Prediction Confidence"
+                )
+
             fig.update_layout(
                 yaxis=dict(
                     range=[0, 1],
@@ -290,8 +312,39 @@ if choice == "Air Quality Prediction (ML)":
                 ),
                 xaxis=dict(type='category')
             )
-            
+
             st.plotly_chart(fig)
+
+            # ✅ กราฟเส้นเปรียบเทียบค่าอินพุตกับ Good Standard
+            factors = ['PM2.5', 'PM10', 'Temperature', 'Humidity', 'Wind Speed']
+            values = [pm25, pm10, temp, humidity, wind_speed]
+            standards = [12, 50, 25, 50, 10]  
+
+            comparison_df = pd.DataFrame({
+                'Factors': factors, 
+                'Your Input': values,
+                'Good Standard': standards
+            })
+
+            fig_comparison = go.Figure()
+            fig_comparison.add_trace(go.Scatter(
+                x=factors, y=values,
+                mode='lines+markers', name='Your Input',
+                line=dict(color='blue')
+            ))
+            fig_comparison.add_trace(go.Scatter(
+                x=factors, y=standards,
+                mode='lines+markers', name='Good Standard',
+                line=dict(color='red', dash='dash', width=2),
+                marker=dict(size=8)
+            ))
+            fig_comparison.update_layout(
+                title="Air Quality Factors Comparison",
+                xaxis_title="Factors",
+                yaxis_title="Value",
+                yaxis=dict(range=[0, max(values + standards) + 10])
+            )
+            st.plotly_chart(fig_comparison)
 
 # ----------------------------------------------------------------------
 # Page 5: Fruit Classification (NN)
