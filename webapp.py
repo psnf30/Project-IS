@@ -226,8 +226,8 @@ if choice == "Air Quality Prediction (ML)":
 
     # ตรวจสอบว่าผู้ใช้ได้กรอกข้อมูลครบถ้วนหรือไม่
     if st.button("Predict Air Quality"):
-    if any(value == 0.0 for value in [pm25, pm10, temp, humidity, wind_speed]):
-        st.error("⚠️ กรุณากรอกค่าทุกช่องก่อนทำการพยากรณ์!")
+        if any(value == 0.0 for value in [pm25, pm10, temp, humidity, wind_speed]):
+            st.error("⚠️ กรุณากรอกค่าทุกช่องก่อนทำการพยากรณ์!")
     else:
         with st.spinner('Predicting...'):
             # เตรียมข้อมูลเข้าโมเดล
